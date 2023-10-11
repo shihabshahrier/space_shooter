@@ -1,6 +1,6 @@
 import pygame
 import os
-import time
+import random
 
 pygame.font.init()  # init font
 pygame.mixer.init()  # init sound
@@ -19,8 +19,9 @@ FPS = 60
 SPACESHIP_HEIGHT, SPACESHIP_WIDTH = 55, 40
 VEL = 4
 BULLET_VEL = 8
+BOMB_VEL = 3
 BORDER = pygame.Rect(WIDTH // 2 - 5, 0, 10, HEIGHT)
-MAX_BULLETS = 2
+MAX_BULLETS = 4
 PLAYER_HEALTH = 9
 
 # Fonts
@@ -52,13 +53,19 @@ SPACE_VIEW = pygame.transform.scale(
     pygame.image.load(os.path.join("Assets", "space_view.png")), (WIDTH, HEIGHT)
 )
 
+BOMB_IMG = pygame.transform.scale(
+    pygame.image.load(os.path.join("Assets", "bomb.png")), (20, 10)
+)
+
 # Sounds
 BULLET_HIT_SOUND = pygame.mixer.Sound(os.path.join("Assets", "hit_sound.mp3"))
 BULLET_FIRE_SOUND = pygame.mixer.Sound(os.path.join("Assets", "shooting_sound.mp3"))
 
 
+
+
 # Draw window
-def draw_window(player_red, player_yellow, yellow_player_bullets, red_player_bullets, red_player_health, yellow_player_health):
+def draw_window(player_red, player_yellow, yellow_player_bullets, red_player_bullets, red_player_health, yellow_player_health, bomb):
     # WIN.fill(WHITE)
     WIN.blit(SPACE_VIEW, (0, 0))
     # draw text
@@ -76,6 +83,9 @@ def draw_window(player_red, player_yellow, yellow_player_bullets, red_player_bul
     WIN.blit(YELLOW_SPACESHIP, (player_yellow.x, player_yellow.y))
     WIN.blit(RED_SPACESHIP, (player_red.x, player_red.y))
     pygame.draw.rect(WIN, BLACK, BORDER)
+
+    # draw bombs
+    WIN.blit(BOMB_IMG, (bomb.x, bomb.y))
 
     # draw bullets
     for bullet in yellow_player_bullets:
@@ -137,6 +147,16 @@ def bullet_control(yellow_player_bullets, red_player_bullets, player_yellow, pla
         elif bullet.x < 0:
             red_player_bullets.remove(bullet)
 
+def bomb_control(bomb, player_red, player_yellow):
+    bomb.y += BOMB_VEL
+    if bomb.y > HEIGHT:
+        bomb.x = random.randint(0, WIDTH)
+        bomb.y = 0
+    if player_red.colliderect(bomb):
+        pygame.event.post(pygame.event.Event(RED_PLAYER_HIT))
+    if player_yellow.colliderect(bomb):
+        pygame.event.post(pygame.event.Event(YELLOW_PLAYER_HIT))
+
 def winner(winner_text):
     winner_text = WINNER_FONT.render(winner_text, 1, WHITE)
     WIN.blit(winner_text, (WIDTH // 2 - winner_text.get_width() // 2, HEIGHT // 2 - winner_text.get_height() // 2))
@@ -187,7 +207,12 @@ def main():
                     red_player_bullets.append(bullet)
                     BULLET_FIRE_SOUND.play()
 
-
+            bomb = pygame.Rect(
+                random.randint(0, WIDTH),
+                0,
+                20,
+                30,
+            )
             if event.type == RED_PLAYER_HIT:
                 red_player_health -= 1
                 BULLET_HIT_SOUND.play()
@@ -203,12 +228,13 @@ def main():
         if winner_text != "":
             winner(winner_text)
             break
-
+        
         key_pressed = pygame.key.get_pressed()
         move_player_yellow(player_yellow, key_pressed)
         move_player_red(player_red, key_pressed)
+        bomb_control(bomb, player_red, player_yellow)
         bullet_control(yellow_player_bullets, red_player_bullets, player_yellow, player_red)
-        draw_window(player_red, player_yellow, yellow_player_bullets, red_player_bullets, red_player_health, yellow_player_health)
+        draw_window(player_red, player_yellow, yellow_player_bullets, red_player_bullets, red_player_health, yellow_player_health, bomb)
 
     # pygame.quit()
     main()
