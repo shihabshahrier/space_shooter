@@ -40,8 +40,8 @@ Ensure you have the following installed on your local machine:
 
 ## How to Play
 
-- **Moving:** Use arrow keys (↑ ↓ → ←) and (A D W S) to navigate your spaceship.
-- **Shooting:** Press the LEFTSHIFT and RIGHTSHIFT to fire lasers towards enemies.
+- **Moving:** Use arrow keys (↑ ↓ → ←) or (A D W S) to navigate your spaceship.
+- **Shooting:** Press the LEFTSHIFT or RIGHTSHIFT to fire lasers towards enemies.
 - **Quit:** Press "ESC" to quit the game at any time.
 
 
